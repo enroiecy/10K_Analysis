@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Visualizations</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css')}}">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+
+<body>
+    <h1>Visualizations</h1>
+    <div>
+        <label for="ticker">Select Company:</label>
+        <select name="ticker" id="ticker">
+            {% for ticker in company_sentiments.keys() %}
+                <option value="{{ ticker }}">{{ ticker }}</option> 
+            {% endfor %}
+        </select>
+    </div>
+    <div id="chart"></div>
+
+    <script>
+        // Retrieve sentiment data from Flask app
+        var company_sentiments = {{ company_sentiments | tojson }};
+
+        // Function to update plot based on selected company
+        function updatePlot() {
+            var selectedCompany = document.getElementById('ticker').value;
+            var data = company_sentiments[selectedCompany];
+
+            // Extract dates and sentiments from data
+            var dates = Object.keys(data);
+            var sentiments = Object.values(data);
+
+            // Create trace for Plotly plot
+            var trace = {
+                x: dates,
+                y: sentiments,
+                type: 'scatter',
+                mode: 'lines+markers',
+                marker: {color: 'blue'},
+                name: 'Sentiment'
+            };
+
+            // Define layout for Plotly plot
+            var layout = {
+                title: 'Sentiment Analysis',
+                xaxis: {
+                    title: 'Date'
+                },
+                yaxis: {
+                    title: 'Sentiment'
+                }
+            };
+
+            // Plot the data using Plotly.js
+            Plotly.newPlot('chart', [trace], layout);
+        }
+
+        // Call updatePlot function when page loads
+        window.onload = updatePlot;
+
+        // Call updatePlot function when selection changes
+        document.getElementById('ticker').addEventListener('change', updatePlot);
+    </script>
+
+
+</body>
+</html>
